@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Für Steffi</title>
+<style>
+  :root{
+    --pink:#f7c9d4;
+    --pink-dark:#e79db0;
+    --cream:#fff6ee;
+    --gold:#d8a94e;
+    --gold-light:#f1cd80;
+    --ink:#5a3b3b;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background: radial-gradient(ellipse at center, #fff0e6 0%, #fbdfe8 60%, #f6c9d8 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    overflow:hidden;
+    color: var(--ink);
+  }
+  #app{ position:relative; width:100vw; height:100vh; }
+
+  /* ---------- Password gate ---------- */
+  #gate{
+    position:fixed; inset:0; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at center, #fff0e6 0%, #f6c9d8 100%);
+    transition: opacity .6s ease, visibility .6s ease;
+  }
+  #gate.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .gate-card{
+    background: var(--cream);
+    border-radius: 20px;
+    padding: 36px 30px;
+    width: 90%;
+    max-width: 340px;
+    min-width: 0;
+    text-align:center;
+    box-shadow: 0 20px 50px rgba(90,50,50,.18);
+    border: 1px solid rgba(216,169,78,.35);
+  }
+  .gate-card h1{
+    font-size: 1.3rem;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .gate-card p{
+    font-size: .9rem;
+    opacity:.75;
+    margin: 0 0 20px;
+  }
+  #pw{
+    width:100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--pink-dark);
+    font-size: 1rem;
+    text-align:center;
+    outline:none;
+    margin-bottom: 14px;
+    background:#fff;
+    color: var(--ink);
+  }
+  #pw:focus{ border-color: var(--gold); }
+  #unlockBtn{
+    width:100%;
+    padding: 12px;
+    border:none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color:#5a3b12;
+    font-weight:600;
+    font-size: 1rem;
+    cursor:pointer;
+    transition: transform .15s ease;
+  }
+  #unlockBtn:active{ transform: scale(.97); }
+  #gateError{
+    color:#b23b4e;
+    font-size:.85rem;
+    height: 18px;
+    margin-top: 10px;
+  }
+
+  /* ---------- Scene ---------- */
+  #scene{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0;
+    transition: opacity .8s ease;
+  }
+  #scene.show{ opacity:1; }
+  #scene.fade-out{ opacity:0; }
+
+  .stage{
+    position:relative;
+    width: 90%;
+    max-width: 420px;
+    min-width: 0;
+    height: 70vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+  }
+
+  .greeting{
+    position:absolute;
+    top: 4%;
+    font-size: 1.1rem;
+    font-weight:600;
+    letter-spacing:.02em;
+    text-align:center;
+    opacity:.85;
+  }
+
+  /* Candles */
+  .candles{
+    position:relative;
+    display:flex;
+    gap: 22px;
+    z-index:3;
+    margin-bottom: -8px;
+  }
+  .candle{
+    width: 10px;
+    height: 54px;
+    background: repeating-linear-gradient(180deg, #fff 0 6px, #ffd9e6 6px 12px);
+    border-radius: 4px;
+    position:relative;
+    box-shadow: inset -2px 0 3px rgba(0,0,0,.08);
+  }
+  .wick{
+    position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+    width:2px; height:8px; background:#4a3a2a; border-radius:1px;
+  }
+  .flame{
+    position:absolute;
+    top:-30px; left:50%;
+    width: 14px; height: 24px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle at 50% 70%, #fff6c8 0%, #ffcf4d 35%, #ff9a3c 65%, #ff6a2e 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: 0 0 14px 4px rgba(255,170,60,.55);
+    animation: flicker 0.5s infinite ease-in-out alternate;
+    transform-origin: 50% 100%;
+  }
+  .candle:nth-child(2) .flame{ animation-duration:.42s; }
+  .candle:nth-child(3) .flame{ animation-duration:.58s; }
+  @keyframes flicker{
+    0%   { transform: translateX(-50%) rotate(-4deg) scale(1); }
+    50%  { transform: translateX(-50%) rotate(3deg) scale(1.08); }
+    100% { transform: translateX(-50%) rotate(-2deg) scale(0.94); }
+  }
+  .smoke{
+    position:absolute; top:-34px; left:50%; transform:translateX(-50%);
+    width:6px; height:6px; border-radius:50%;
+    background: rgba(150,150,150,.5);
+    filter: blur(3px);
+    opacity:0;
+  }
+  .candle.out .flame{ animation:none; opacity:0; transform:translateX(-50%) scale(.2); transition: opacity .5s ease, transform .5s ease; }
+  .candle.out .smoke{ animation: smokeRise 1.6s ease-out forwards; }
+  @keyframes smokeRise{
+    0%{ opacity:.6; transform:translateX(-50%) translateY(0) scale(1); }
+    100%{ opacity:0; transform:translateX(-50%) translateY(-40px) scale(2.4); }
+  }
+
+  /* Cake */
+  .cake{
+    position:relative;
+    width: 100%;
+    z-index:2;
+  }
+  .tier-top{
+    width: 78%;
+    height: 46px;
+    margin: 0 auto;
+    background: var(--cream);
+    border-radius: 14px 14px 6px 6px;
+    position:relative;
+    box-shadow: 0 6px 0 rgba(0,0,0,.05);
+  }
+  .tier-top::before{
+    content:"";
+    position:absolute; top:-14px; left:0; right:0;
+    height: 24px;
+    background: var(--cream);
+    border-radius: 50%;
+  }
+  .plaque{
+    position:absolute; top: 44%; left:50%; transform:translate(-50%,-50%);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.5rem;
+    font-weight:700;
+    color: var(--pink-dark);
+    letter-spacing:.02em;
+  }
+  .tier-bottom{
+    width: 100%;
+    height: 90px;
+    margin-top: -4px;
+    background: linear-gradient(180deg, var(--pink) 0%, var(--pink-dark) 100%);
+    border-radius: 10px 10px 16px 16px;
+    position:relative;
+    box-shadow: 0 10px 24px rgba(120,60,80,.25);
+  }
+  .tier-bottom::after{
+    content:"";
+    position:absolute; left:0; right:0; top:10px;
+    height:10px;
+    background: repeating-linear-gradient(90deg, var(--cream) 0 10px, transparent 10px 20px);
+    opacity:.6;
+  }
+  .plate{
+    width: 106%;
+    height: 14px;
+    margin-left: -3%;
+    background: var(--gold-light);
+    border-radius: 50%;
+    box-shadow: 0 8px 18px rgba(0,0,0,.15);
+  }
+
+  /* Hand + gift */
+  .hand-wrap{
+    position:absolute;
+    bottom: 46%;
+    left:50%;
+    transform: translate(-50%, 40px);
+    opacity:0;
+    z-index:5;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    transition: transform 1.8s cubic-bezier(.2,.8,.2,1), opacity 1s ease;
+  }
+  .hand-wrap.rise{
+    transform: translate(-50%, -95px);
+    opacity:1;
+  }
+  .hand-emoji{
+    font-size: 3.4rem;
+    transform: rotate(-6deg);
+    filter: drop-shadow(0 8px 10px rgba(0,0,0,.2));
+  }
+  .voucher-mini{
+    margin-top: -18px;
+    width: 92px;
+    padding: 8px 6px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    border-radius: 8px;
+    text-align:center;
+    font-size: .62rem;
+    font-weight:700;
+    color:#5a3b12;
+    box-shadow: 0 6px 14px rgba(160,110,20,.35);
+    border: 1px solid rgba(255,255,255,.5);
+  }
+
+  /* Full screen voucher */
+  #voucher{
+    position:fixed; inset:0;
+    z-index: 50;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at center, #fff3e0 0%, #f6d9a8 55%, #eec172 100%);
+    opacity:0;
+    visibility:hidden;
+    transform: scale(.05);
+    transform-origin: 50% 62%;
+    transition: transform 1.3s cubic-bezier(.2,.9,.25,1), opacity .6s ease;
+  }
+  #voucher.show{
+    opacity:1; visibility:visible; transform: scale(1);
+  }
+  .voucher-card{
+    width: 88%;
+    max-width: 460px;
+    min-width: 0;
+    padding: 44px 30px;
+    background: var(--cream);
+    border-radius: 22px;
+    text-align:center;
+    box-shadow: 0 25px 60px rgba(120,70,20,.25);
+    border: 2px solid var(--gold);
+    position:relative;
+  }
+  .voucher-card .ribbon{
+    font-size: 2.2rem;
+    margin-bottom: 6px;
+  }
+  .voucher-card h2{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.6rem;
+    margin: 0 0 18px;
+    color: var(--pink-dark);
+  }
+  .voucher-card p{
+    font-size: 1.08rem;
+    line-height:1.6;
+    margin:0;
+    color: var(--ink);
+  }
+  .voucher-card .sign{
+    margin-top: 22px;
+    font-size: 1.4rem;
+  }
+
+  /* confetti */
+  .confetti{
+    position:fixed; top:-10px;
+    width:8px; height:14px;
+    opacity:.9;
+    z-index: 60;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) rotate(540deg); opacity:.2; }
+  }
+
+  @media (max-width: 380px){
+    .plaque{ font-size: 1.2rem; }
+    .hand-emoji{ font-size: 2.8rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="gate">
+    <div class="gate-card">
+      <h1>Für dich</h1>
+      <p>Gib das Passwort ein, um die Überraschung zu öffnen</p>
+      <input id="pw" type="password" placeholder="Passwort" autocomplete="off">
+      <button id="unlockBtn">Öffnen</button>
+      <div id="gateError"></div>
+    </div>
+  </div>
+
+  <div id="scene">
+    <div class="stage">
+      <div class="greeting">Alles Liebe zum 50.&nbsp;Geburtstag</div>
+
+      <div class="hand-wrap" id="handWrap">
+        <div class="hand-emoji">🤚</div>
+        <div class="voucher-mini">GUTSCHEIN</div>
+      </div>
+
+      <div class="candles" id="candles">
+        <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
+        <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
+        <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
+      </div>
+
+      <div class="cake">
+        <div class="tier-top"><div class="plaque">50</div></div>
+        <div class="tier-bottom"></div>
+        <div class="plate"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="voucher">
+    <div class="voucher-card">
+      <div class="ribbon">🎡</div>
+      <h2>Gutschein</h2>
+      <p>Happy Birthday liebste Steffi,<br>
+      zu deinem Geburtstag freue ich mich mit dir nach Wien zu fahren.</p>
+      <div class="sign">💛</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var CORRECT = "liebe";
+
+  var gate = document.getElementById('gate');
+  var pwInput = document.getElementById('pw');
+  var unlockBtn = document.getElementById('unlockBtn');
+  var gateError = document.getElementById('gateError');
+  var scene = document.getElementById('scene');
+  var candles = document.getElementById('candles');
+  var handWrap = document.getElementById('handWrap');
+  var voucher = document.getElementById('voucher');
+
+  function tryUnlock(){
+    var val = (pwInput.value || "").trim().toLowerCase();
+    if (val === CORRECT){
+      gate.classList.add('hidden');
+      startShow();
+    } else {
+      gateError.textContent = "Das war nicht ganz richtig …";
+      pwInput.value = "";
+      pwInput.focus();
+    }
+  }
+  unlockBtn.addEventListener('click', tryUnlock);
+  pwInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') tryUnlock();
+  });
+  setTimeout(function(){ pwInput.focus(); }, 300);
+
+  function confettiBurst(count){
+    var colors = ['#f2b6c6','#f1cd80','#d8a94e','#fff0e6','#e79db0'];
+    for (var i=0;i<count;i++){
+      (function(){
+        var el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = (Math.random()*100) + 'vw';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.animationDuration = (2.5 + Math.random()*2) + 's';
+        el.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+        document.body.appendChild(el);
+        setTimeout(function(){ el.remove(); }, 5000);
+      })();
+    }
+  }
+
+  function startShow(){
+    setTimeout(function(){
+      scene.classList.add('show');
+    }, 200);
+
+    // candles burn for 10s, then go out
+    setTimeout(function(){
+      candles.querySelectorAll('.candle').forEach(function(c){
+        c.classList.add('out');
+      });
+    }, 10000);
+
+    // hand rises with the voucher
+    setTimeout(function(){
+      handWrap.classList.add('rise');
+    }, 11800);
+
+    // voucher takes over full screen
+    setTimeout(function(){
+      scene.classList.add('fade-out');
+      voucher.classList.add('show');
+      confettiBurst(60);
+    }, 15200);
+  }
+})();
+</script>
+</body>
+</html>
