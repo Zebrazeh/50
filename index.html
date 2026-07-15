@@ -13,6 +13,7 @@
     --gold:#d8a94e;
     --gold-light:#f1cd80;
     --ink:#5a3b3b;
+    --rose:#e8607e;
   }
   *{ box-sizing:border-box; }
   html,body{
@@ -122,18 +123,20 @@
   .candles{
     position:relative;
     display:flex;
-    gap: 22px;
+    align-items:flex-end;
+    gap: 13px;
     z-index:3;
     margin-bottom: -8px;
   }
   .candle{
-    width: 10px;
-    height: 54px;
-    background: repeating-linear-gradient(180deg, #fff 0 6px, #ffd9e6 6px 12px);
+    width: 8px;
+    height: 46px;
+    background: repeating-linear-gradient(180deg, #fff 0 5px, #ffd9e6 5px 10px);
     border-radius: 4px;
     position:relative;
     box-shadow: inset -2px 0 3px rgba(0,0,0,.08);
   }
+  .candle:nth-child(odd){ height: 54px; }
   .wick{
     position:absolute; top:-6px; left:50%; transform:translateX(-50%);
     width:2px; height:8px; background:#4a3a2a; border-radius:1px;
@@ -151,6 +154,8 @@
   }
   .candle:nth-child(2) .flame{ animation-duration:.42s; }
   .candle:nth-child(3) .flame{ animation-duration:.58s; }
+  .candle:nth-child(4) .flame{ animation-duration:.46s; }
+  .candle:nth-child(5) .flame{ animation-duration:.63s; }
   @keyframes flicker{
     0%   { transform: translateX(-50%) rotate(-4deg) scale(1); }
     50%  { transform: translateX(-50%) rotate(3deg) scale(1.08); }
@@ -170,56 +175,76 @@
     100%{ opacity:0; transform:translateX(-50%) translateY(-40px) scale(2.4); }
   }
 
-  /* Cake */
+  /* Cake — 3 tiers */
   .cake{
     position:relative;
     width: 100%;
     z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
   }
-  .tier-top{
-    width: 78%;
-    height: 46px;
-    margin: 0 auto;
-    background: var(--cream);
-    border-radius: 14px 14px 6px 6px;
+  .tier{
     position:relative;
-    box-shadow: 0 6px 0 rgba(0,0,0,.05);
+    border-radius: 8px 8px 4px 4px;
+    box-shadow: 0 3px 0 rgba(0,0,0,.05);
   }
-  .tier-top::before{
+  .tier::before{
     content:"";
-    position:absolute; top:-14px; left:0; right:0;
-    height: 24px;
-    background: var(--cream);
+    position:absolute; top:-11px; left:2%; right:2%;
+    height: 20px;
+    background: inherit;
     border-radius: 50%;
   }
+  .tier::after{
+    content:"";
+    position:absolute; left:4%; right:4%; top:9px;
+    height:9px;
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 8px, transparent 8px 16px);
+    opacity:.7;
+    border-radius: 4px;
+  }
+  .tier-top{
+    width: 44%;
+    height: 38px;
+    background: var(--cream);
+    z-index:3;
+  }
+  .tier-mid{
+    width: 68%;
+    height: 48px;
+    margin-top: -2px;
+    background: var(--pink);
+    z-index:2;
+  }
+  .tier-bottom{
+    width: 96%;
+    height: 62px;
+    margin-top: -2px;
+    background: var(--pink-dark);
+    box-shadow: 0 10px 24px rgba(120,60,80,.3);
+    z-index:1;
+  }
   .plaque{
-    position:absolute; top: 44%; left:50%; transform:translate(-50%,-50%);
+    position:absolute; top: 46%; left:50%; transform:translate(-50%,-50%);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight:700;
     color: var(--pink-dark);
     letter-spacing:.02em;
+    z-index:4;
   }
-  .tier-bottom{
-    width: 100%;
-    height: 90px;
-    margin-top: -4px;
-    background: linear-gradient(180deg, var(--pink) 0%, var(--pink-dark) 100%);
-    border-radius: 10px 10px 16px 16px;
-    position:relative;
-    box-shadow: 0 10px 24px rgba(120,60,80,.25);
-  }
-  .tier-bottom::after{
-    content:"";
-    position:absolute; left:0; right:0; top:10px;
-    height:10px;
-    background: repeating-linear-gradient(90deg, var(--cream) 0 10px, transparent 10px 20px);
-    opacity:.6;
+  .pearls{
+    position:absolute; left:6%; right:6%; bottom:6px;
+    height:6px;
+    background: radial-gradient(circle, rgba(255,255,255,.85) 2.5px, transparent 3px);
+    background-size: 12px 6px;
+    opacity:.8;
   }
   .plate{
-    width: 106%;
+    width: 108%;
     height: 14px;
-    margin-left: -3%;
+    margin-top: 2px;
     background: var(--gold-light);
     border-radius: 50%;
     box-shadow: 0 8px 18px rgba(0,0,0,.15);
@@ -280,33 +305,62 @@
     width: 88%;
     max-width: 460px;
     min-width: 0;
-    padding: 44px 30px;
-    background: var(--cream);
-    border-radius: 22px;
+    padding: 44px 30px 38px;
+    background: linear-gradient(180deg, var(--cream) 0%, #fff9f2 100%);
+    border-radius: 24px;
     text-align:center;
-    box-shadow: 0 25px 60px rgba(120,70,20,.25);
+    box-shadow: 0 0 0 6px rgba(232,96,126,.14), 0 25px 60px rgba(120,70,20,.25);
     border: 2px solid var(--gold);
     position:relative;
+    overflow:hidden;
+  }
+  .voucher-card::before{
+    content:"";
+    position:absolute; inset:9px;
+    border: 1.5px dashed rgba(232,96,126,.35);
+    border-radius: 17px;
+    pointer-events:none;
   }
   .voucher-card .ribbon{
-    font-size: 2.2rem;
-    margin-bottom: 6px;
+    font-size: 1.9rem;
+    margin-bottom: 10px;
+    letter-spacing: .15em;
   }
   .voucher-card h2{
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 1.6rem;
-    margin: 0 0 18px;
-    color: var(--pink-dark);
+    font-family: 'Snell Roundhand', 'Brush Script MT', Georgia, cursive;
+    font-size: 2.3rem;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: var(--rose);
   }
   .voucher-card p{
     font-size: 1.08rem;
-    line-height:1.6;
+    line-height:1.65;
     margin:0;
     color: var(--ink);
   }
   .voucher-card .sign{
     margin-top: 22px;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    animation: heartbeat 1.4s ease-in-out infinite;
+  }
+  @keyframes heartbeat{
+    0%, 100%{ transform: scale(1); }
+    25%{ transform: scale(1.18); }
+    40%{ transform: scale(0.96); }
+    55%{ transform: scale(1.12); }
+  }
+
+  .love-float{
+    position:fixed;
+    bottom: -30px;
+    z-index: 55;
+    pointer-events:none;
+    animation: floatUp linear forwards;
+  }
+  @keyframes floatUp{
+    0%{ transform: translateY(0) translateX(0) rotate(0deg); opacity:.9; }
+    100%{ transform: translateY(-100vh) translateX(var(--drift, 20px)) rotate(20deg); opacity:0; }
   }
 
   /* confetti */
@@ -353,11 +407,14 @@
         <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
         <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
         <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
+        <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
+        <div class="candle"><span class="wick"></span><span class="flame"></span><span class="smoke"></span></div>
       </div>
 
       <div class="cake">
-        <div class="tier-top"><div class="plaque">50</div></div>
-        <div class="tier-bottom"></div>
+        <div class="tier tier-top"><div class="plaque">50</div><div class="pearls"></div></div>
+        <div class="tier tier-mid"><div class="pearls"></div></div>
+        <div class="tier tier-bottom"><div class="pearls"></div></div>
         <div class="plate"></div>
       </div>
     </div>
@@ -365,11 +422,11 @@
 
   <div id="voucher">
     <div class="voucher-card">
-      <div class="ribbon">🎡</div>
+      <div class="ribbon">💕 🎡 💕</div>
       <h2>Gutschein</h2>
       <p>Happy Birthday liebste Steffi,<br>
       zu deinem Geburtstag freue ich mich mit dir nach Wien zu fahren.</p>
-      <div class="sign">💛</div>
+      <div class="sign">❤️</div>
     </div>
   </div>
 
@@ -421,6 +478,24 @@
     }
   }
 
+  function loveFloat(count){
+    var hearts = ['💕','💖','❤️','💗'];
+    for (var i=0;i<count;i++){
+      (function(){
+        var el = document.createElement('div');
+        el.className = 'love-float';
+        el.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+        el.style.left = (5 + Math.random()*90) + 'vw';
+        el.style.fontSize = (1 + Math.random()*1.4) + 'rem';
+        el.style.setProperty('--drift', (Math.random()*60-30) + 'px');
+        el.style.animationDuration = (4 + Math.random()*3) + 's';
+        el.style.animationDelay = (Math.random()*1.5) + 's';
+        document.body.appendChild(el);
+        setTimeout(function(){ el.remove(); }, 9000);
+      })();
+    }
+  }
+
   function startShow(){
     setTimeout(function(){
       scene.classList.add('show');
@@ -443,6 +518,13 @@
       scene.classList.add('fade-out');
       voucher.classList.add('show');
       confettiBurst(60);
+      loveFloat(14);
+      var floatCount = 0;
+      var floatInterval = setInterval(function(){
+        loveFloat(4);
+        floatCount++;
+        if (floatCount >= 5) clearInterval(floatInterval);
+      }, 3000);
     }, 15200);
   }
 })();
